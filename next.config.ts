@@ -1,7 +1,30 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+	images: {
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "image.tmdb.org",
+				pathname: "/t/p/**",
+			},
+			{
+				protocol: "https",
+				hostname: "walter-r2.trakt.tv",
+				pathname: "/images/**",
+			},
+			{
+				protocol: "https",
+				hostname: "walter.trakt.tv",
+				pathname: "/images/**",
+			},
+			{
+				protocol: "https",
+				hostname: "secure.gravatar.com",
+				pathname: "/avatar/**",
+			},
+		],
+	},
 };
 
 export default nextConfig;

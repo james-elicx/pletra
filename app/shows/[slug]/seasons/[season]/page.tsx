@@ -1,0 +1,212 @@
+import Image from "next/image";
+import Link from "@/components/ui/link";
+import { createTraktClient } from "@/lib/trakt";
+import { fetchTmdbImages } from "@/lib/tmdb";
+import type { ShowSummary } from "@/lib/types";
+import { Backdrop } from "@/components/media/backdrop";
+import { RatingDisplay } from "@/components/media/rating-display";
+import { formatRuntime } from "@/lib/format";
+
+interface Props {
+	params: Promise<{ slug: string; season: string }>;
+}
+
+export default async function SeasonPage({ params }: Props) {
+	const { slug, season: seasonStr } = await params;
+	const seasonNumber = parseInt(seasonStr, 10);
+	const client = createTraktClient();
+
+	const [showRes, episodesRes, seasonsRes] = await Promise.all([
+		client.shows.summary({
+			params: { id: slug },
+			query: { extended: "full" },
+		}),
+		client.shows.season.episodes({
+			// @ts-expect-error - ts-rest index signature mismatch
+			params: { id: slug, season: seasonNumber },
+			query: { extended: "full" },
+		}),
+		client.shows.seasons({ params: { id: slug }, query: { extended: "full" } }),
+	]);
+
+	if (showRes.status !== 200) {
+		return (
+			<div className="flex min-h-[50vh] items-center justify-center text-muted">
+				Show not found.
+			</div>
+		);
+	}
+
+	const show = showRes.body as unknown as ShowSummary;
+	const images = show.ids?.tmdb
+		? await fetchTmdbImages(show.ids.tmdb, "tv")
+		: { poster: null, backdrop: null };
+
+	type Episode = {
+		season?: number;
+		number?: number;
+		title?: string;
+		overview?: string;
+		first_aired?: string;
+		runtime?: number;
+		rating?: number;
+		votes?: number;
+		ids?: { trakt?: number; tmdb?: number };
+	};
+
+	const episodes = episodesRes.status === 200 ? (episodesRes.body as Episode[]) : [];
+
+	// Get season numbers for prev/next navigation
+	type SeasonInfo = { number?: number };
+	const allSeasons =
+		seasonsRes.status === 200
+			? (seasonsRes.body as SeasonInfo[]).filter((s) => (s.number ?? 0) > 0).map((s) => s.number!)
+			: [];
+	const currentIdx = allSeasons.indexOf(seasonNumber);
+	const prevSeason = currentIdx > 0 ? allSeasons[currentIdx - 1] : null;
+	const nextSeason = currentIdx < allSeasons.length - 1 ? allSeasons[currentIdx + 1] : null;
+
+	// Fetch episode stills from TMDB
+	const episodeStills = await Promise.all(
+		episodes.map(async (ep) => {
+			if (!show.ids?.tmdb || !ep.number) return null;
+			try {
+				const r = await fetch(
+					`https://api.themoviedb.org/3/tv/${show.ids.tmdb}/season/${seasonNumber}/episode/${ep.number}?api_key=${process.env.TMDB_API_KEY}`,
+					{ next: { revalidate: 86400 } },
+				);
+				if (!r.ok) return null;
+				const data = await r.json<{ still_path?: string }>();
+				return data.still_path ? `https://image.tmdb.org/t/p/w400${data.still_path}` : null;
+			} catch {
+				return null;
+			}
+		}),
+	);
+
+	return (
+		<>
+			<Backdrop src={images.backdrop} alt={show.title} />
+
+			<div className="relative mx-auto max-w-6xl px-4 pt-6 pb-20">
+				{/* Top row: breadcrumb + prev/next */}
+				<div className="mb-6 flex items-center justify-between">
+					<nav className="flex items-center gap-1.5 text-sm">
+						<Link href="/" className="text-zinc-400 transition-colors hover:text-white">
+							Home
+						</Link>
+						<span className="text-zinc-600">›</span>
+						<Link
+							href={`/shows/${slug}`}
+							className="text-zinc-400 transition-colors hover:text-white"
+						>
+							{show.title}
+						</Link>
+						<span className="text-zinc-600">›</span>
+						<span className="text-zinc-200">Season {seasonNumber}</span>
+					</nav>
+
+					<div className="flex items-center gap-2">
+						{prevSeason != null && (
+							<Link
+								href={`/shows/${slug}/seasons/${prevSeason}`}
+								className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm text-zinc-400 transition-colors hover:bg-white/5 hover:text-white"
+							>
+								<svg
+									className="h-4 w-4"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth={1.5}
+									viewBox="0 0 24 24"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M15.75 19.5L8.25 12l7.5-7.5"
+									/>
+								</svg>
+								S{prevSeason}
+							</Link>
+						)}
+						{nextSeason != null && (
+							<Link
+								href={`/shows/${slug}/seasons/${nextSeason}`}
+								className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm text-zinc-400 transition-colors hover:bg-white/5 hover:text-white"
+							>
+								S{nextSeason}
+								<svg
+									className="h-4 w-4"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth={1.5}
+									viewBox="0 0 24 24"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M8.25 4.5l7.5 7.5-7.5 7.5"
+									/>
+								</svg>
+							</Link>
+						)}
+					</div>
+				</div>
+
+				<div className="mb-8">
+					<h1 className="text-3xl font-bold tracking-tight">Season {seasonNumber}</h1>
+					<p className="mt-1 text-sm text-zinc-500">
+						{episodes.length} episode{episodes.length !== 1 ? "s" : ""}
+					</p>
+				</div>
+
+				<div className="space-y-3">
+					{episodes.map((ep, i) => {
+						const airDate = ep.first_aired ? new Date(ep.first_aired).toLocaleDateString() : null;
+
+						return (
+							<Link
+								key={ep.ids?.trakt ?? ep.number}
+								href={`/shows/${slug}/seasons/${seasonNumber}/episodes/${ep.number}`}
+								className="group flex gap-4 rounded-xl bg-white/5 p-3 ring-1 ring-white/5 transition-all hover:bg-white/[0.07] hover:ring-white/10"
+							>
+								<div className="relative aspect-video w-40 flex-shrink-0 overflow-hidden rounded-md bg-zinc-800">
+									{episodeStills[i] ? (
+										<Image
+											src={episodeStills[i]!}
+											alt={ep.title ?? ""}
+											fill
+											className="object-cover"
+											sizes="160px"
+										/>
+									) : (
+										<div className="flex h-full items-center justify-center text-lg text-muted">
+											{ep.number}
+										</div>
+									)}
+								</div>
+
+								<div className="flex-1 space-y-1">
+									<div className="flex items-start justify-between gap-2">
+										<div>
+											<p className="text-sm font-medium">
+												<span className="text-muted">E{ep.number}</span> {ep.title ?? "TBA"}
+											</p>
+											{airDate && <p className="text-xs text-muted">{airDate}</p>}
+										</div>
+										<RatingDisplay rating={ep.rating} votes={ep.votes} size="sm" />
+									</div>
+									{ep.overview && (
+										<p className="line-clamp-2 text-xs leading-relaxed text-zinc-400">
+											{ep.overview}
+										</p>
+									)}
+									{ep.runtime && <p className="text-xs text-muted">{formatRuntime(ep.runtime)}</p>}
+								</div>
+							</Link>
+						);
+					})}
+				</div>
+			</div>
+		</>
+	);
+}
