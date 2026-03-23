@@ -96,6 +96,32 @@ function SettingsPopover({ isSignedIn }: { isSignedIn: boolean }) {
 						</button>
 					</label>
 
+					<label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-white/5">
+						<span className="text-sm text-zinc-300">Default View</span>
+						<div className="flex gap-0.5 rounded-md bg-zinc-800 p-0.5">
+							<button
+								onClick={() => updateSetting("defaultView", "grid")}
+								className={`cursor-pointer rounded px-2 py-1 text-[10px] font-medium transition-colors ${
+									settings.defaultView === "grid"
+										? "bg-white/10 text-white"
+										: "text-zinc-500 hover:text-zinc-300"
+								}`}
+							>
+								Grid
+							</button>
+							<button
+								onClick={() => updateSetting("defaultView", "list")}
+								className={`cursor-pointer rounded px-2 py-1 text-[10px] font-medium transition-colors ${
+									settings.defaultView === "list"
+										? "bg-white/10 text-white"
+										: "text-zinc-500 hover:text-zinc-300"
+								}`}
+							>
+								List
+							</button>
+						</div>
+					</label>
+
 					{isSignedIn && (
 						<>
 							<div className="my-2 h-px bg-zinc-800" />
@@ -164,6 +190,29 @@ export function FloatingNav() {
 					</svg>
 				</Link>
 
+				{/* Search trigger */}
+				<button
+					onClick={() => {
+						window.dispatchEvent(new CustomEvent("open-search-palette"));
+					}}
+					className="flex h-9 cursor-pointer items-center rounded-full px-3 text-sm text-zinc-400 transition-colors hover:text-white"
+					title="Search (⌘P)"
+				>
+					<svg
+						className="h-4 w-4"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth={1.5}
+						viewBox="0 0 24 24"
+					>
+						<path
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+						/>
+					</svg>
+				</button>
+
 				{/* Profile */}
 				{userSlug && (
 					<Link
@@ -189,35 +238,11 @@ export function FloatingNav() {
 					</Link>
 				)}
 
-				{/* Search trigger */}
-				<button
-					onClick={() => {
-						window.dispatchEvent(new CustomEvent("open-search-palette"));
-					}}
-					className="flex h-9 cursor-pointer items-center rounded-full px-3 text-sm text-zinc-400 transition-colors hover:text-white"
-					title="Search (⌘P)"
-				>
-					<svg
-						className="h-4 w-4"
-						fill="none"
-						stroke="currentColor"
-						strokeWidth={1.5}
-						viewBox="0 0 24 24"
-					>
-						<path
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-						/>
-					</svg>
-				</button>
-
 				{/* External Trakt link */}
-				{traktUrl && (
-					<>
-						<div className="h-5 w-px bg-zinc-700" />
-						<a
-							href={traktUrl}
+				<>
+					<div className="h-5 w-px bg-zinc-700" />
+					<a
+						href={traktUrl ?? "https://trakt.tv"}
 							target="_blank"
 							rel="noopener noreferrer"
 							className="flex h-9 cursor-pointer items-center rounded-full px-3 text-sm text-zinc-400 transition-colors hover:text-[#ed1c24]"
@@ -236,9 +261,9 @@ export function FloatingNav() {
 									d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
 								/>
 							</svg>
-						</a>
-					</>
-				)}
+					</a>
+				</>
+
 
 				<div className="h-5 w-px bg-zinc-700" />
 

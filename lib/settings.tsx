@@ -4,10 +4,12 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 
 export interface AppSettings {
 	showBackdrops: boolean;
+	defaultView: "list" | "grid";
 }
 
 const defaultSettings: AppSettings = {
 	showBackdrops: true,
+	defaultView: "grid",
 };
 
 const STORAGE_KEY = "trakt-settings";
