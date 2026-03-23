@@ -12,6 +12,8 @@ import {
 } from "vinext/server/image-optimization";
 // import type { ImageConfig } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
+import { setCacheHandler } from "vinext/shims/cache";
+import { KVCacheHandler } from "vinext/cloudflare";
 
 interface Env {
 	ASSETS: Fetcher;
@@ -22,6 +24,7 @@ interface Env {
 			};
 		};
 	};
+	VINEXT_CACHE: KVNamespace;
 }
 
 interface ExecutionContext {
@@ -37,6 +40,8 @@ interface ExecutionContext {
 
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+		setCacheHandler(new KVCacheHandler(env.VINEXT_CACHE));
+
 		const url = new URL(request.url);
 
 		// Image optimization via Cloudflare Images binding.
