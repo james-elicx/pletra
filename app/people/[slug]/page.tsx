@@ -299,12 +299,12 @@ export default async function PersonPage({ params }: Props) {
 
 			<div className="relative mx-auto max-w-6xl px-4 pt-6 pb-20">
 				{/* Breadcrumb */}
-				<nav className="mb-6 flex items-center gap-1.5 text-sm">
+				<nav className="mb-6 flex items-center gap-2 text-sm">
 					<Link href="/" className="text-zinc-400 transition-colors hover:text-white">
 						Home
 					</Link>
-					<span className="text-zinc-600">›</span>
-					<span className="text-zinc-200">{person.name}</span>
+					<span className="text-zinc-700">/</span>
+					<span className="font-medium text-zinc-200">{person.name}</span>
 				</nav>
 
 				{/* Hero */}
@@ -412,8 +412,10 @@ export default async function PersonPage({ params }: Props) {
 						<div className="shrink-0 space-y-3 text-sm lg:w-44">
 							{person.birthday && (
 								<div>
-									<span className="text-xs text-zinc-500">Born</span>
-									<p className="text-zinc-300">
+									<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+										Born
+									</p>
+									<p className="mt-0.5 text-zinc-300">
 										{new Date(person.birthday).toLocaleDateString("en-US", {
 											year: "numeric",
 											month: "long",
@@ -424,8 +426,10 @@ export default async function PersonPage({ params }: Props) {
 							)}
 							{person.death && (
 								<div>
-									<span className="text-xs text-zinc-500">Died</span>
-									<p className="text-zinc-300">
+									<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+										Died
+									</p>
+									<p className="mt-0.5 text-zinc-300">
 										{new Date(person.death).toLocaleDateString("en-US", {
 											year: "numeric",
 											month: "long",
@@ -436,8 +440,12 @@ export default async function PersonPage({ params }: Props) {
 							)}
 							{person.gender && person.gender !== "unknown" && (
 								<div>
-									<span className="text-xs text-zinc-500">Gender</span>
-									<p className="capitalize text-zinc-300">{person.gender.replace("_", "-")}</p>
+									<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+										Gender
+									</p>
+									<p className="mt-0.5 capitalize text-zinc-400">
+										{person.gender.replace("_", "-")}
+									</p>
 								</div>
 							)}
 						</div>

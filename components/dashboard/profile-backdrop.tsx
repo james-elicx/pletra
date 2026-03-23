@@ -1,5 +1,6 @@
-import { getAuthenticatedTraktClient } from "@/lib/trakt-server";
 import Image from "next/image";
+import { getAuthenticatedTraktClient } from "@/lib/trakt-server";
+import { ProfileBackdropClient } from "./profile-backdrop-client";
 
 export async function ProfileBackdrop() {
 	const client = await getAuthenticatedTraktClient();
@@ -17,18 +18,5 @@ export async function ProfileBackdrop() {
 
 	if (!coverImage) return null;
 
-	return (
-		<div className="fixed inset-0 -z-10">
-			<Image
-				src={coverImage}
-				alt="Profile backdrop"
-				fill
-				className="object-cover"
-				priority
-				sizes="100vw"
-			/>
-			<div className="absolute inset-0 backdrop-blur-[6px]" />
-			<div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/70 to-background" />
-		</div>
-	);
+	return <ProfileBackdropClient src={coverImage} />;
 }

@@ -91,19 +91,19 @@ export default async function SeasonPage({ params }: Props) {
 			<div className="relative mx-auto max-w-6xl px-4 pt-6 pb-20">
 				{/* Top row: breadcrumb + prev/next */}
 				<div className="mb-6 flex items-center justify-between">
-					<nav className="flex items-center gap-1.5 text-sm">
+					<nav className="flex items-center gap-2 text-sm">
 						<Link href="/" className="text-zinc-400 transition-colors hover:text-white">
 							Home
 						</Link>
-						<span className="text-zinc-600">›</span>
+						<span className="text-zinc-700">/</span>
 						<Link
 							href={`/shows/${slug}`}
 							className="text-zinc-400 transition-colors hover:text-white"
 						>
 							{show.title}
 						</Link>
-						<span className="text-zinc-600">›</span>
-						<span className="text-zinc-200">Season {seasonNumber}</span>
+						<span className="text-zinc-700">/</span>
+						<span className="font-medium text-zinc-200">Season {seasonNumber}</span>
 					</nav>
 
 					<div className="flex items-center gap-2">

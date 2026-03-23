@@ -90,7 +90,6 @@ export default async function MoviePage({ params }: Props) {
 	}
 
 	const ratingValue = ratings?.trakt?.rating ?? movie.rating;
-	const ratingPercent = ratingValue != null ? Math.round(ratingValue * 10) : null;
 
 	return (
 		<>
@@ -98,19 +97,19 @@ export default async function MoviePage({ params }: Props) {
 
 			<div className="relative mx-auto max-w-6xl px-4 pt-6 pb-20">
 				{/* Breadcrumb */}
-				<nav className="mb-6 flex items-center gap-1.5 text-sm">
+				<nav className="mb-6 flex items-center gap-2 text-sm">
 					<Link href="/" className="text-zinc-400 transition-colors hover:text-white">
 						Home
 					</Link>
-					<span className="text-zinc-600">›</span>
-					<span className="text-zinc-200">{movie.title}</span>
+					<span className="text-zinc-700">/</span>
+					<span className="font-medium text-zinc-200">{movie.title}</span>
 				</nav>
 
 				{/* Hero section */}
 				<div className="flex flex-col gap-8 md:flex-row">
 					{/* Poster */}
 					<div className="flex-shrink-0">
-						<div className="relative aspect-[2/3] w-48 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 md:w-56">
+						<div className="relative aspect-[2/3] w-48 overflow-hidden rounded-xl shadow-2xl ring-1 ring-white/10 md:w-56">
 							{images.poster ? (
 								<Image
 									src={images.poster}
@@ -128,85 +127,75 @@ export default async function MoviePage({ params }: Props) {
 						</div>
 					</div>
 
-					{/* Info + Metadata side by side */}
+					{/* Info + Rating + Sidebar */}
 					<div className="flex flex-1 flex-col gap-6 lg:flex-row lg:gap-10">
 						{/* Main info */}
-						<div className="flex-1 space-y-4">
-							<div>
-								<h1 className="text-3xl font-bold tracking-tight md:text-4xl">{movie.title}</h1>
-								<div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-zinc-400">
-									{movie.year && <span>{movie.year}</span>}
-									{movie.runtime && (
-										<>
-											<span className="text-zinc-600">·</span>
-											<span>{formatRuntime(movie.runtime)}</span>
-										</>
-									)}
-									{movie.certification && (
-										<span className="rounded border border-zinc-700 px-1.5 py-0.5 text-[11px]">
-											{movie.certification}
-										</span>
+						<div className="flex-1 space-y-5">
+							<div className="flex items-start justify-between gap-6">
+								<div>
+									<h1 className="text-3xl font-bold tracking-tight md:text-4xl">{movie.title}</h1>
+									<div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-zinc-400">
+										{movie.year && <span>{movie.year}</span>}
+										{movie.runtime && (
+											<>
+												<span className="text-zinc-600">·</span>
+												<span>{formatRuntime(movie.runtime)}</span>
+											</>
+										)}
+										{movie.certification && (
+											<span className="rounded border border-zinc-700 px-1.5 py-0.5 text-[11px] font-medium text-zinc-400">
+												{movie.certification}
+											</span>
+										)}
+									</div>
+									{movie.genres && movie.genres.length > 0 && (
+										<div className="mt-3 flex flex-wrap gap-1.5">
+											{movie.genres.slice(0, 5).map((g) => (
+												<span
+													key={g}
+													className="rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px] text-zinc-400"
+												>
+													{g}
+												</span>
+											))}
+										</div>
 									)}
 								</div>
-								{movie.genres && movie.genres.length > 0 && (
-									<div className="mt-3 flex flex-wrap gap-1.5">
-										{movie.genres.slice(0, 5).map((g) => (
-											<span
-												key={g}
-												className="rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-zinc-400 ring-1 ring-white/5"
-											>
-												{g}
-											</span>
-										))}
-									</div>
-								)}
+								<RatingDisplay
+									rating={ratingValue}
+									votes={ratings?.trakt?.votes ?? movie.votes}
+									size="lg"
+								/>
 							</div>
 
 							{movie.overview && (
 								<p className="max-w-2xl text-sm leading-relaxed text-zinc-300">{movie.overview}</p>
 							)}
 
-							{/* Rating + actions */}
-							<div className="flex flex-wrap items-center gap-5 pt-1">
-								{ratingPercent != null && (
-									<RatingDisplay
-										rating={ratingValue}
-										votes={ratings?.trakt?.votes ?? movie.votes}
-										size="lg"
+							<div className="flex flex-wrap items-center gap-2">
+								<RatingInput mediaType="movies" ids={movie.ids ?? {}} currentRating={userRating} />
+								{isAuthenticated && (
+									<WatchStatus
+										mediaType="movies"
+										ids={movie.ids ?? {}}
+										initialWatched={isWatched}
+										plays={watchPlays}
+										lastWatchedAt={lastWatchedAt}
 									/>
 								)}
-								{userRating != null && (
-									<div className="flex items-center gap-2 rounded-lg bg-white/5 px-3 py-2 ring-1 ring-white/10">
-										<span className="text-xs text-zinc-400">Your rating</span>
-										<span className="text-sm font-bold text-yellow-400">★ {userRating}</span>
-									</div>
-								)}
-							</div>
-
-							<div className="flex flex-wrap items-center gap-3">
-								<RatingInput mediaType="movies" ids={movie.ids ?? {}} currentRating={userRating} />
-								<div className="h-5 w-px bg-zinc-800" />
 								<WatchlistButton mediaType="movies" ids={movie.ids ?? {}} />
 							</div>
-
-							{isAuthenticated && (
-								<WatchStatus
-									mediaType="movies"
-									ids={movie.ids ?? {}}
-									initialWatched={isWatched}
-									plays={watchPlays}
-									lastWatchedAt={lastWatchedAt}
-								/>
-							)}
 						</div>
 
 						{/* Side metadata */}
-						{(movie.released || movie.country || movie.status || movie.certification) && (
-							<div className="shrink-0 space-y-3 text-sm lg:w-44">
+						{(movie.released || movie.country || movie.status) && (
+							<div className="shrink-0 space-y-4 lg:w-40">
 								{movie.released && (
 									<div>
-										<span className="text-xs text-zinc-500">Released</span>
-										<p className="text-zinc-300">
+										<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+											Released
+										</p>
+										<p className="mt-0.5 text-sm text-zinc-300">
 											{new Date(movie.released).toLocaleDateString("en-US", {
 												year: "numeric",
 												month: "short",
@@ -217,14 +206,18 @@ export default async function MoviePage({ params }: Props) {
 								)}
 								{movie.country && (
 									<div>
-										<span className="text-xs text-zinc-500">Country</span>
-										<p className="uppercase text-zinc-300">{movie.country}</p>
+										<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+											Country
+										</p>
+										<p className="mt-0.5 text-sm uppercase text-zinc-300">{movie.country}</p>
 									</div>
 								)}
 								{movie.status && (
 									<div>
-										<span className="text-xs text-zinc-500">Status</span>
-										<p className="capitalize text-zinc-300">{movie.status}</p>
+										<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+											Status
+										</p>
+										<p className="mt-0.5 text-sm capitalize text-zinc-300">{movie.status}</p>
 									</div>
 								)}
 							</div>
@@ -233,7 +226,7 @@ export default async function MoviePage({ params }: Props) {
 				</div>
 
 				{/* Content sections */}
-				<div className="mt-12 space-y-10">
+				<div className="mt-14 space-y-12">
 					<Suspense fallback={<SectionSkeleton title="Cast" count={8} />}>
 						<CastSection slug={slug} />
 					</Suspense>

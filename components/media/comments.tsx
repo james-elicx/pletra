@@ -139,6 +139,60 @@ export function Comments({
 		[expandedReplies, repliesMap],
 	);
 
+	const [newComment, setNewComment] = useState("");
+	const [submitting, setSubmitting] = useState(false);
+	const [submitError, setSubmitError] = useState<string | null>(null);
+	const [isSpoiler, setIsSpoiler] = useState(false);
+
+	const submitComment = useCallback(async () => {
+		if (!newComment.trim() || submitting) return;
+		setSubmitting(true);
+		setSubmitError(null);
+		try {
+			const body: Record<string, unknown> = {
+				comment: newComment.trim(),
+				spoiler: isSpoiler,
+			};
+			if (mediaType === "episodes" && seasonNumber != null && episodeNumber != null) {
+				body.show = { ids: { slug } };
+				body.episode = { season: seasonNumber, number: episodeNumber };
+			} else if (mediaType === "shows") {
+				body.show = { ids: { slug } };
+			} else {
+				body.movie = { ids: { slug } };
+			}
+			const res = await fetch("/api/trakt/comments", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(body),
+			});
+			if (!res.ok) {
+				const err = await res.text();
+				throw new Error(err || "Failed to post comment");
+			}
+			setNewComment("");
+			setIsSpoiler(false);
+			// Refresh comments
+			setPage(1);
+			setComments([]);
+			void fetchComments(1, sort);
+		} catch (e) {
+			setSubmitError(e instanceof Error ? e.message : "Failed to post comment");
+		} finally {
+			setSubmitting(false);
+		}
+	}, [
+		newComment,
+		submitting,
+		isSpoiler,
+		mediaType,
+		slug,
+		seasonNumber,
+		episodeNumber,
+		sort,
+		fetchComments,
+	]);
+
 	const sortOptions: { value: SortMode; label: string }[] = [
 		{ value: "likes", label: "Top" },
 		{ value: "newest", label: "Recent" },
@@ -219,6 +273,37 @@ export function Comments({
 					)}
 				</div>
 			)}
+
+			{/* Comment form */}
+			<div className="mt-6 space-y-2">
+				<textarea
+					value={newComment}
+					onChange={(e) => setNewComment(e.target.value)}
+					placeholder="Add a comment..."
+					rows={2}
+					className="w-full resize-none rounded-lg border border-zinc-800 bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-600 outline-none transition-colors focus:border-zinc-600 focus:bg-white/[0.05]"
+				/>
+				{newComment.trim() && (
+					<div className="flex items-center justify-end gap-3">
+						{submitError && <span className="text-xs text-red-400">{submitError}</span>}
+						<button
+							onClick={() => setIsSpoiler(!isSpoiler)}
+							className={`cursor-pointer rounded-full px-2.5 py-1 text-[11px] transition-colors ${
+								isSpoiler ? "bg-yellow-500/10 text-yellow-400" : "text-zinc-600 hover:text-zinc-400"
+							}`}
+						>
+							{isSpoiler ? "⚠ Spoiler" : "Spoiler?"}
+						</button>
+						<button
+							onClick={submitComment}
+							disabled={submitting}
+							className="cursor-pointer rounded-full bg-accent px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-default disabled:opacity-40"
+						>
+							{submitting ? "Posting..." : "Post"}
+						</button>
+					</div>
+				)}
+			</div>
 		</div>
 	);
 }

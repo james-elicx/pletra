@@ -110,7 +110,7 @@ async function ShowCast({ slug }: { slug: string }) {
 		person?: { name?: string; ids?: { trakt?: number; slug?: string; tmdb?: number } };
 	};
 	const body = res.body as { cast?: CastMember[] };
-	const cast = body.cast?.slice(0, 12) ?? [];
+	const cast = body.cast?.slice(0, 20) ?? [];
 	if (cast.length === 0) return null;
 
 	const photos = await Promise.all(
@@ -134,12 +134,12 @@ async function ShowCast({ slug }: { slug: string }) {
 	return (
 		<div>
 			<h3 className="mb-3 text-sm font-semibold uppercase tracking-widest text-zinc-200">Cast</h3>
-			<div className="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8">
+			<div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-hide">
 				{cast.map((member, i) => (
 					<Link
 						key={member.person?.ids?.trakt}
 						href={`/people/${member.person?.ids?.slug ?? member.person?.ids?.trakt}`}
-						className="group relative overflow-hidden rounded-lg bg-zinc-900"
+						className="group relative w-28 shrink-0 overflow-hidden rounded-lg bg-zinc-900"
 					>
 						<div className="relative aspect-[3/4]">
 							{photos[i] ? (
@@ -148,7 +148,7 @@ async function ShowCast({ slug }: { slug: string }) {
 									alt={member.person?.name ?? ""}
 									fill
 									className="object-cover transition-transform group-hover:scale-105"
-									sizes="120px"
+									sizes="112px"
 								/>
 							) : (
 								<div className="flex h-full items-center justify-center bg-zinc-800 text-xl text-zinc-700">
@@ -238,18 +238,18 @@ export default async function ShowPage({ params }: Props) {
 
 			<div className="relative mx-auto max-w-6xl px-4 pt-6 pb-20">
 				{/* Breadcrumb */}
-				<nav className="mb-6 flex items-center gap-1.5 text-sm">
+				<nav className="mb-6 flex items-center gap-2 text-sm">
 					<Link href="/" className="text-zinc-400 transition-colors hover:text-white">
 						Home
 					</Link>
-					<span className="text-zinc-600">›</span>
-					<span className="text-zinc-200">{show.title}</span>
+					<span className="text-zinc-700">/</span>
+					<span className="font-medium text-zinc-200">{show.title}</span>
 				</nav>
 
 				{/* Hero */}
 				<div className="flex flex-col gap-8 md:flex-row">
 					<div className="flex-shrink-0">
-						<div className="relative aspect-[2/3] w-48 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 md:w-56">
+						<div className="relative aspect-[2/3] w-48 overflow-hidden rounded-xl shadow-2xl ring-1 ring-white/10 md:w-56">
 							{images.poster ? (
 								<Image
 									src={images.poster}
@@ -267,90 +267,83 @@ export default async function ShowPage({ params }: Props) {
 						</div>
 					</div>
 
-					{/* Info + metadata */}
+					{/* Info + Rating + Sidebar */}
 					<div className="flex flex-1 flex-col gap-6 lg:flex-row lg:gap-10">
 						<div className="flex-1 space-y-4">
-							<div>
-								<div className="flex flex-wrap items-center gap-3">
-									<h1 className="text-3xl font-bold tracking-tight md:text-4xl">{show.title}</h1>
-									{status && (
-										<span
-											className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${statusStyle}`}
-										>
-											{status}
-										</span>
-									)}
-								</div>
-								<div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-zinc-400">
-									{show.year && <span>{String(show.year)}</span>}
-									{show.network && (
-										<>
-											<span className="text-zinc-600">·</span>
-											<span>{String(show.network)}</span>
-										</>
-									)}
-									{show.runtime && (
-										<>
-											<span className="text-zinc-600">·</span>
-											<span>{formatRuntime(show.runtime)}/ep</span>
-										</>
-									)}
-								</div>
-								{genres && genres.length > 0 && (
-									<div className="mt-3 flex flex-wrap gap-1.5">
-										{genres.slice(0, 5).map((g) => (
+							<div className="flex items-start justify-between gap-6">
+								<div>
+									<div className="flex flex-wrap items-center gap-3">
+										<h1 className="text-3xl font-bold tracking-tight md:text-4xl">{show.title}</h1>
+										{status && (
 											<span
-												key={g}
-												className="rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-zinc-400 ring-1 ring-white/5"
+												className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${statusStyle}`}
 											>
-												{g}
+												{status}
 											</span>
-										))}
+										)}
 									</div>
-								)}
+									<div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-zinc-400">
+										{show.year && <span>{String(show.year)}</span>}
+										{show.network && (
+											<>
+												<span className="text-zinc-600">·</span>
+												<span>{String(show.network)}</span>
+											</>
+										)}
+										{show.runtime && (
+											<>
+												<span className="text-zinc-600">·</span>
+												<span>{formatRuntime(show.runtime)}/ep</span>
+											</>
+										)}
+									</div>
+									{genres && genres.length > 0 && (
+										<div className="mt-3 flex flex-wrap gap-1.5">
+											{genres.slice(0, 5).map((g) => (
+												<span
+													key={g}
+													className="rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px] text-zinc-400"
+												>
+													{g}
+												</span>
+											))}
+										</div>
+									)}
+								</div>
+								<RatingDisplay
+									rating={ratingValue}
+									votes={ratings?.trakt?.votes ?? show.votes}
+									size="lg"
+								/>
 							</div>
 
 							{show.overview && (
 								<p className="max-w-2xl text-sm leading-relaxed text-zinc-300">{show.overview}</p>
 							)}
 
-							<div className="flex flex-wrap items-center gap-5 pt-1">
-								<RatingDisplay
-									rating={ratingValue}
-									votes={ratings?.trakt?.votes ?? show.votes}
-									size="lg"
-								/>
-								{userRating != null && (
-									<div className="flex items-center gap-2 rounded-lg bg-white/5 px-3 py-2 ring-1 ring-white/10">
-										<span className="text-xs text-zinc-400">Your rating</span>
-										<span className="text-sm font-bold text-yellow-400">★ {userRating}</span>
-									</div>
-								)}
-							</div>
-
-							<div className="flex flex-wrap items-center gap-3">
+							<div className="flex flex-wrap items-center gap-2">
 								<RatingInput mediaType="shows" ids={show.ids ?? {}} currentRating={userRating} />
-								<div className="h-5 w-px bg-zinc-800" />
+								{isAuthenticated && showProgress && (
+									<WatchStatus
+										mediaType="episodes"
+										ids={show.ids ?? {}}
+										initialWatched={false}
+										showProgress={showProgress}
+									/>
+								)}
 								<WatchlistButton mediaType="shows" ids={show.ids ?? {}} />
 							</div>
-
-							{isAuthenticated && showProgress && (
-								<WatchStatus
-									mediaType="episodes"
-									ids={show.ids ?? {}}
-									initialWatched={false}
-									showProgress={showProgress}
-								/>
-							)}
 						</div>
 
 						{/* Side metadata */}
 						{(show.first_aired || show.country || show.certification) && (
-							<div className="shrink-0 space-y-3 text-sm lg:w-44">
+							<div className="shrink-0 space-y-4 lg:w-40">
 								{show.first_aired && (
 									<div>
-										<span className="text-xs text-zinc-500">First Aired</span>
-										<p className="text-zinc-300">
+										<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+											First Aired
+										</p>
+										<p className="mt-0.5 text-sm text-zinc-300">
 											{new Date(show.first_aired).toLocaleDateString("en-US", {
 												year: "numeric",
 												month: "short",
@@ -361,14 +354,18 @@ export default async function ShowPage({ params }: Props) {
 								)}
 								{show.country && (
 									<div>
-										<span className="text-xs text-zinc-500">Country</span>
-										<p className="uppercase text-zinc-300">{show.country}</p>
+										<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+											Country
+										</p>
+										<p className="mt-0.5 text-sm uppercase text-zinc-300">{show.country}</p>
 									</div>
 								)}
 								{show.certification && (
 									<div>
-										<span className="text-xs text-zinc-500">Certification</span>
-										<p className="text-zinc-300">{show.certification}</p>
+										<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+											Certification
+										</p>
+										<p className="mt-0.5 text-sm text-zinc-300">{show.certification}</p>
 									</div>
 								)}
 							</div>

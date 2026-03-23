@@ -30,7 +30,7 @@ export async function CastSection({ slug }: { slug: string }) {
 	};
 
 	const body = res.body as { cast?: CastMember[] };
-	const cast = body.cast?.slice(0, 12) ?? [];
+	const cast = body.cast?.slice(0, 20) ?? [];
 	if (cast.length === 0) return null;
 
 	const photos = await Promise.all(
@@ -42,12 +42,12 @@ export async function CastSection({ slug }: { slug: string }) {
 	return (
 		<div>
 			<h3 className="mb-3 text-sm font-semibold uppercase tracking-widest text-zinc-200">Cast</h3>
-			<div className="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8">
+			<div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-hide">
 				{cast.map((member, i) => (
 					<Link
 						key={member.person?.ids?.trakt}
 						href={`/people/${member.person?.ids?.slug ?? member.person?.ids?.trakt}`}
-						className="group relative overflow-hidden rounded-lg bg-zinc-900"
+						className="group relative w-28 shrink-0 overflow-hidden rounded-lg bg-zinc-900"
 					>
 						<div className="relative aspect-[3/4]">
 							{photos[i] ? (
@@ -56,7 +56,7 @@ export async function CastSection({ slug }: { slug: string }) {
 									alt={member.person?.name ?? ""}
 									fill
 									className="object-cover transition-transform group-hover:scale-105"
-									sizes="120px"
+									sizes="112px"
 								/>
 							) : (
 								<div className="flex h-full items-center justify-center bg-zinc-800 text-xl text-zinc-700">
