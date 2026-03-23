@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useTransition } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "@/components/ui/link";
 import { useRouter } from "next/navigation";
@@ -8,6 +8,7 @@ import { ViewToggle } from "@/components/ui/view-toggle";
 import { Select } from "@/components/ui/select";
 import { MediaCard } from "@/components/dashboard/media-card";
 import { useSettings } from "@/lib/settings";
+import { useNavigate } from "@/lib/use-navigate";
 
 type ListEntry = {
 	id: number;
@@ -81,9 +82,9 @@ export function ListDetailClient({
 	activeGenres,
 	activeRuntimes,
 }: ListDetailClientProps) {
+	const { navigate: nav, isPending } = useNavigate();
 	const router = useRouter();
 	const { settings } = useSettings();
-	const [isPending, startTransition] = useTransition();
 	const [search, setSearch] = useState("");
 	const [typeFilter, setTypeFilter] = useState("all");
 	const [removing, setRemoving] = useState<number | null>(null);
@@ -114,9 +115,7 @@ export function ListDetailClient({
 		if (genres) params.set("genres", genres);
 		if (runtimes) params.set("runtimes", runtimes);
 		const qs = params.toString();
-		startTransition(() => {
-			router.push(`/users/${slug}/lists/${listSlug}${qs ? `?${qs}` : ""}`);
-		});
+		nav(`/users/${slug}/lists/${listSlug}${qs ? `?${qs}` : ""}`);
 	}
 
 	function applyGenreFilter(genre: string) {

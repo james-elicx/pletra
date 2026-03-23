@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ProxiedImage as Image } from "@/components/ui/proxied-image";
 import { useSettings } from "@/lib/settings";
 
 export function ProfileBackdropClient({ src }: { src: string }) {

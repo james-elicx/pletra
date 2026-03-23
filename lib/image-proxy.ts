@@ -1,6 +1,9 @@
 /**
  * Wraps image URLs from domains that block direct access (walter-r2.trakt.tv, etc.)
- * through our image proxy API, so Next.js image optimizer can fetch them.
+ * through our image proxy API.
+ *
+ * Returns { url, unoptimized } — use `unoptimized` on the Image component
+ * to skip Next.js image optimizer (which would double-fetch through the proxy).
  */
 const PROXIED_HOSTS = ["walter-r2.trakt.tv", "walter.trakt.tv"];
 
@@ -17,4 +20,10 @@ export function proxyImageUrl(url: string | null | undefined): string | null {
 	}
 
 	return url;
+}
+
+/** Returns true if the URL goes through our image proxy */
+export function isProxiedUrl(url: string | null | undefined): boolean {
+	if (!url) return false;
+	return url.startsWith("/api/image-proxy");
 }

@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import Image from "next/image";
+import { ProxiedImage as Image } from "@/components/ui/proxied-image";
 import Link from "@/components/ui/link";
 import { createTraktClient } from "@/lib/trakt";
 import { fetchTmdbImages } from "@/lib/tmdb";

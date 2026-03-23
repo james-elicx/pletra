@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useMemo, useTransition, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import Image from "next/image";
 import Link from "@/components/ui/link";
-import { useRouter } from "next/navigation";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { Select } from "@/components/ui/select";
 import { MediaCard } from "@/components/dashboard/media-card";
 import { RatingInput } from "@/components/media/rating-input";
 import { useSettings } from "@/lib/settings";
+import { useNavigate } from "@/lib/use-navigate";
 
 type HistoryEntry = {
 	id: number;
@@ -60,9 +60,8 @@ export function HistoryClient({
 	activeSort,
 	activeSearch,
 }: HistoryClientProps) {
-	const router = useRouter();
+	const { navigate: nav, isPending } = useNavigate();
 	const { settings } = useSettings();
-	const [isPending, startTransition] = useTransition();
 	const [view, setView] = useState<"list" | "grid">(settings.defaultView);
 	const [searchInput, setSearchInput] = useState(activeSearch);
 	const searchTimerRef = useState<ReturnType<typeof setTimeout> | null>(null);
@@ -81,11 +80,9 @@ export function HistoryClient({
 			if (q) p.set("q", q);
 
 			const qs = p.toString();
-			startTransition(() => {
-				router.push(`/users/${slug}/history${qs ? `?${qs}` : ""}`);
-			});
+			nav(`/users/${slug}/history${qs ? `?${qs}` : ""}`);
 		},
-		[router, slug, currentType, activeSort, activeSearch],
+		[nav, slug, currentType, activeSort, activeSearch],
 	);
 
 	function handleSearchChange(value: string) {

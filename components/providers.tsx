@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
+import { ProgressProvider } from "@bprogress/next/app";
 import { SettingsProvider } from "@/lib/settings";
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -19,7 +20,16 @@ export function Providers({ children }: { children: ReactNode }) {
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<SettingsProvider>{children}</SettingsProvider>
+			<SettingsProvider>
+				<ProgressProvider
+					color="#ed1c24"
+					height="4px"
+					options={{ showSpinner: false }}
+					shallowRouting
+				>
+					{children}
+				</ProgressProvider>
+			</SettingsProvider>
 		</QueryClientProvider>
 	);
 }

@@ -13,6 +13,7 @@
 		"prepare": "vp config"
 	},
 	"dependencies": {
+		"@bprogress/next": "^3.2.12",
 		"@tailwindcss/vite": "^4.2.2",
 		"@tanstack/react-query": "^5.94.5",
 		"@trakt/api": "jsr:^0.3.10",
