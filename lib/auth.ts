@@ -1,10 +1,28 @@
 import { betterAuth } from "better-auth";
 import { genericOAuth } from "better-auth/plugins";
 
+const SESSION_MAX_AGE = 7 * 24 * 60 * 60; // 7 days, matches session.expiresIn default
+
 export const auth = betterAuth({
 	// No database — uses stateless cookie-only sessions.
 	// Session data stored in encrypted JWE cookie, account data in account cookie.
 	secret: process.env.BETTER_AUTH_SECRET!,
+	session: {
+		expiresIn: SESSION_MAX_AGE,
+		cookieCache: {
+			enabled: true,
+			// Must be set explicitly — defaults to 300 (5 min) which causes the
+			// cookie cache to expire during idle periods, leading to a failed DB
+			// lookup (there is no DB) and a null session on the next warm request.
+			maxAge: SESSION_MAX_AGE,
+			strategy: "jwe",
+			refreshCache: true,
+		},
+	},
+	account: {
+		storeStateStrategy: "cookie",
+		storeAccountCookie: true,
+	},
 	plugins: [
 		genericOAuth({
 			config: [

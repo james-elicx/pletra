@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { cache } from "react";
 import { auth } from "@/lib/auth";
 import { createTraktClient, type TraktClient } from "./trakt";
@@ -30,20 +31,28 @@ const getAccessToken = cache(async (): Promise<string | null> => {
 	return tokenRes?.accessToken ?? null;
 });
 
+/**
+ * Returns an authenticated Trakt client for the current request.
+ * Redirects to /auth/login if there is no valid session, so callers
+ * never need to handle the unauthenticated case themselves.
+ */
 export async function getAuthenticatedTraktClient(): Promise<TraktClient> {
 	const accessToken = await getAccessToken();
 
 	if (!accessToken) {
-		throw new Error("Not authenticated");
+		redirect("/auth/login");
 	}
 
 	return createTraktClient(accessToken);
 }
 
+/**
+ * Returns an authenticated Trakt client if a session exists, or an
+ * unauthenticated client that can only access public endpoints.
+ * Use this on pages that are partially personalised — the page itself
+ * renders for everyone but auth-only data is simply omitted.
+ */
 export async function getOptionalTraktClient(): Promise<TraktClient> {
-	try {
-		return await getAuthenticatedTraktClient();
-	} catch {
-		return createTraktClient();
-	}
+	const accessToken = await getAccessToken();
+	return createTraktClient(accessToken ?? undefined);
 }
