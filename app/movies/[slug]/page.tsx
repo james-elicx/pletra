@@ -95,7 +95,7 @@ export default async function MoviePage({ params }: Props) {
 		<>
 			<Backdrop src={images.backdrop} alt={movie.title} />
 
-			<div className="relative mx-auto max-w-6xl px-4 pt-6 pb-20">
+			<div className="relative z-10 mx-auto max-w-6xl px-4 pt-6 pb-20">
 				{/* Breadcrumb */}
 				<nav className="mb-6 flex items-center gap-2 text-sm">
 					<Link href="/" className="text-zinc-400 transition-colors hover:text-white">

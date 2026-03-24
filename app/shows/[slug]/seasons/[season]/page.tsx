@@ -88,7 +88,7 @@ export default async function SeasonPage({ params }: Props) {
 		<>
 			<Backdrop src={images.backdrop} alt={show.title} />
 
-			<div className="relative mx-auto max-w-6xl px-4 pt-6 pb-20">
+			<div className="relative z-10 mx-auto max-w-6xl px-4 pt-6 pb-20">
 				{/* Top row: breadcrumb + prev/next */}
 				<div className="mb-6 flex items-center justify-between">
 					<nav className="flex items-center gap-2 text-sm">

@@ -207,7 +207,7 @@ export default async function EpisodePage({ params }: Props) {
 		<>
 			<Backdrop src={backdropSrc} alt={episode.title ?? ""} />
 
-			<div className="relative mx-auto max-w-6xl px-4 pt-8 pb-16">
+			<div className="relative z-10 mx-auto max-w-6xl px-4 pt-8 pb-16">
 				{/* Top row: breadcrumb + prev/next */}
 				<div className="mb-6 flex items-center justify-between">
 					<nav className="flex flex-wrap items-center gap-2 text-sm">

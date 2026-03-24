@@ -35,7 +35,7 @@ export default function DashboardPage() {
 				<ProfileBackdrop />
 			</Suspense>
 
-			<div className="relative mx-auto max-w-7xl space-y-8 px-4 pt-6">
+			<div className="relative z-10 mx-auto max-w-7xl space-y-8 px-4 pt-6">
 				<Suspense fallback={<GridSkeleton rows={3} />}>
 					<ContinueWatching />
 				</Suspense>

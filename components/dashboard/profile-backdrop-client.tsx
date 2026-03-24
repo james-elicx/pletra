@@ -9,7 +9,7 @@ export function ProfileBackdropClient({ src }: { src: string }) {
 	if (!settings.showBackdrops) return null;
 
 	return (
-		<div className="fixed inset-0 -z-10 h-screen w-screen">
+		<div className="fixed inset-0 z-0 h-screen w-screen">
 			<Image
 				src={src}
 				alt="Profile backdrop"

@@ -9,7 +9,8 @@ export function Backdrop({ src, alt }: { src: string | null; alt: string }) {
 	if (!src || !settings.showBackdrops) return null;
 
 	return (
-		<div className="fixed inset-0 -z-10 h-screen w-screen">
+		<div className="fixed inset-0 z-0 h-screen w-screen">
+			<div className="skeleton absolute inset-0" />
 			<Image src={src} alt={alt} fill className="object-cover" priority sizes="100vw" />
 			<div className="absolute inset-0 backdrop-blur-sm" />
 			<div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
