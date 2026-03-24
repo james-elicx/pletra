@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
-import { TASA_Orbiter, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
+import { Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { FloatingNav } from "@/components/nav/floating-nav";
 import { SearchPalette } from "@/components/search/search-palette";
 import "./globals.css";
 
-const tasaOrbiter = TASA_Orbiter({
+const tasaOrbiter = localFont({
+	src: "./fonts/TASAOrbiterVF.woff2",
 	variable: "--font-tasa-orbiter",
-	subsets: ["latin"],
-	axes: ["wght"],
+	display: "swap",
+	weight: "100 900",
 });
 
 const geistMono = Geist_Mono({
