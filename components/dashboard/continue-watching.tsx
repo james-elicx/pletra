@@ -9,9 +9,8 @@ export async function ContinueWatching() {
 
 	// Fetch user slug for progress page link
 	const profileRes = await client.users.profile({ params: { id: "me" } }).catch(() => null);
-	const userSlug = profileRes?.status === 200
-		? (profileRes.body as { username?: string })?.username
-		: null;
+	const userSlug =
+		profileRes?.status === 200 ? (profileRes.body as { username?: string })?.username : null;
 
 	// Fetch up-next shows, in-progress movies, and user ratings in parallel
 	const [showsRes, moviesRes, epRatingsRes, movieRatingsRes] = await Promise.all([

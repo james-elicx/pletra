@@ -91,11 +91,7 @@ export default async function ProgressPage({ params, searchParams }: Props) {
 	try {
 		client = await getAuthenticatedTraktClient();
 	} catch {
-		return (
-			<div className="text-center text-sm text-zinc-500">
-				Sign in to view your progress.
-			</div>
-		);
+		return <div className="text-center text-sm text-zinc-500">Sign in to view your progress.</div>;
 	}
 
 	const { sort_by, sort_how } = getApiSort(activeSort);
@@ -103,7 +99,7 @@ export default async function ProgressPage({ params, searchParams }: Props) {
 	// When search or client-side filters are active, we need all items to filter accurately.
 	// Otherwise, paginate at the API level for efficiency.
 	const clientOnlySort = activeSort === "progress" || activeSort === "remaining";
-	const needsAllItems = !!activeSearch || (activeFilter !== "all") || clientOnlySort;
+	const needsAllItems = !!activeSearch || activeFilter !== "all" || clientOnlySort;
 
 	let rawItems: UpNextItem[];
 	let apiTotalPages: number | null = null;
@@ -136,16 +132,14 @@ export default async function ProgressPage({ params, searchParams }: Props) {
 		});
 
 		if (res.status !== 200) {
-			return (
-				<div className="text-center text-sm text-zinc-500">
-					Could not load progress.
-				</div>
-			);
+			return <div className="text-center text-sm text-zinc-500">Could not load progress.</div>;
 		}
 
 		rawItems = res.body as UpNextItem[];
-		apiTotalPages = parseInt(String(res.headers.get?.("x-pagination-page-count") ?? "0"), 10) || null;
-		apiTotalItems = parseInt(String(res.headers.get?.("x-pagination-item-count") ?? "0"), 10) || null;
+		apiTotalPages =
+			parseInt(String(res.headers.get?.("x-pagination-page-count") ?? "0"), 10) || null;
+		apiTotalItems =
+			parseInt(String(res.headers.get?.("x-pagination-item-count") ?? "0"), 10) || null;
 	}
 
 	// Fetch images for this page
@@ -208,7 +202,7 @@ export default async function ProgressPage({ params, searchParams }: Props) {
 			return pb - pa;
 		});
 	} else if (activeSort === "remaining") {
-		items.sort((a, b) => (a.aired - a.completed) - (b.aired - b.completed));
+		items.sort((a, b) => a.aired - a.completed - (b.aired - b.completed));
 	}
 
 	// Pagination: when we fetched all items, paginate client-side; otherwise use API headers
@@ -223,7 +217,8 @@ export default async function ProgressPage({ params, searchParams }: Props) {
 		paginatedItems = items.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
 	} else {
 		paginatedItems = items;
-		totalPages = apiTotalPages ?? (rawItems.length < ITEMS_PER_PAGE ? currentPage : currentPage + 1);
+		totalPages =
+			apiTotalPages ?? (rawItems.length < ITEMS_PER_PAGE ? currentPage : currentPage + 1);
 		totalItems = apiTotalItems ?? items.length;
 	}
 

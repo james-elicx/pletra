@@ -34,7 +34,16 @@ const filterOptions = [
 	{ value: "just-started", label: "Just Started (<20%)" },
 ];
 
-export function ProgressClient({ slug, items, activeSort, activeFilter, activeSearch, currentPage, totalPages, totalItems }: Props) {
+export function ProgressClient({
+	slug,
+	items,
+	activeSort,
+	activeFilter,
+	activeSearch,
+	currentPage,
+	totalPages,
+	totalItems,
+}: Props) {
 	const { navigate, isPending } = useNavigate();
 	const [searchInput, setSearchInput] = useState(activeSearch);
 	const searchTimerRef = useState<ReturnType<typeof setTimeout> | null>(null);
@@ -99,9 +108,7 @@ export function ProgressClient({ slug, items, activeSort, activeFilter, activeSe
 			{/* List */}
 			<div className={`space-y-2 transition-opacity ${isPending ? "opacity-60" : ""}`}>
 				{items.length === 0 && (
-					<div className="py-12 text-center text-sm text-zinc-600">
-						No shows in progress.
-					</div>
+					<div className="py-12 text-center text-sm text-zinc-600">No shows in progress.</div>
 				)}
 				{items.map((item) => {
 					const pct = item.aired > 0 ? Math.round((item.completed / item.aired) * 100) : 0;
@@ -109,9 +116,7 @@ export function ProgressClient({ slug, items, activeSort, activeFilter, activeSe
 					const epLabel = item.nextEpisode
 						? `S${String(item.nextEpisode.season).padStart(2, "0")}E${String(item.nextEpisode.number).padStart(2, "0")}`
 						: null;
-					const lastWatched = item.lastWatchedAt
-						? formatRelativeDate(item.lastWatchedAt)
-						: null;
+					const lastWatched = item.lastWatchedAt ? formatRelativeDate(item.lastWatchedAt) : null;
 
 					return (
 						<div
@@ -227,9 +232,7 @@ export function ProgressClient({ slug, items, activeSort, activeFilter, activeSe
 											{remaining} episode{remaining !== 1 ? "s" : ""} remaining
 										</span>
 									)}
-									{lastWatched && (
-										<span className="text-zinc-600">Watched {lastWatched}</span>
-									)}
+									{lastWatched && <span className="text-zinc-600">Watched {lastWatched}</span>}
 								</div>
 							</div>
 						</div>

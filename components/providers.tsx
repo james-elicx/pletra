@@ -28,9 +28,7 @@ export function Providers({ children }: { children: ReactNode }) {
 					options={{ showSpinner: false }}
 					shallowRouting
 				>
-					<ToastProvider>
-						{children}
-					</ToastProvider>
+					<ToastProvider>{children}</ToastProvider>
 				</ProgressProvider>
 			</SettingsProvider>
 		</QueryClientProvider>
