@@ -1,5 +1,5 @@
 import Link from "@/components/ui/link";
-import { getAuthenticatedTraktClient } from "@/lib/trakt-server";
+import { getAuthenticatedTraktClient, getUserSettings } from "@/lib/trakt-server";
 import { fetchTmdbImages, fetchTmdbEpisodeImages } from "@/lib/tmdb";
 import { CalendarView } from "./calendar-view";
 
@@ -91,7 +91,7 @@ export default async function CalendarPage({ searchParams }: Props) {
 	const fetchShows = type !== "movies";
 	const fetchMovies = type !== "shows";
 
-	const [showsRes, moviesRes] = await Promise.all([
+	const [showsRes, moviesRes, settings] = await Promise.all([
 		fetchShows
 			? client.calendars.shows({
 					params: { target: "my", start_date: startStr, days },
@@ -104,7 +104,11 @@ export default async function CalendarPage({ searchParams }: Props) {
 					query: { extended: "full" },
 				})
 			: Promise.resolve({ status: 200 as const, body: [] }),
+		getUserSettings(),
 	]);
+
+	const userTz = settings?.account.timezone ?? "UTC";
+	const use24hr = settings?.account.time_24hr ?? false;
 
 	const calShows = showsRes.status === 200 ? (showsRes.body as CalendarShow[]) : [];
 	const calMovies = moviesRes.status === 200 ? (moviesRes.body as CalendarMovie[]) : [];
@@ -148,10 +152,27 @@ export default async function CalendarPage({ searchParams }: Props) {
 		if (!show || !ep) continue;
 
 		const aired = entry.first_aired;
-		const date = aired ? aired.split("T")[0] : "";
-		const time = aired
-			? new Date(aired).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
-			: undefined;
+		let date = "";
+		let time: string | undefined;
+		if (aired) {
+			const d = new Date(aired);
+			// Format date in the user's Trakt timezone (YYYY-MM-DD)
+			const parts = new Intl.DateTimeFormat("en-CA", {
+				timeZone: userTz,
+				year: "numeric",
+				month: "2-digit",
+				day: "2-digit",
+			}).formatToParts(d);
+			date = `${parts.find((p) => p.type === "year")?.value}-${parts.find((p) => p.type === "month")?.value}-${parts.find((p) => p.type === "day")?.value}`;
+			// Format time in the user's Trakt timezone
+			time = d.toLocaleTimeString("en-US", {
+				timeZone: userTz,
+				hour: "numeric",
+				minute: "2-digit",
+				...(use24hr ? { hour12: false } : {}),
+			});
+		}
+
 		const imgs = imageMap.get(`tv-${show.ids?.tmdb}`);
 		const still = stillMap.get(`still-${show.ids?.tmdb}-${ep.season}-${ep.number}`);
 		const epLabel = `S${String(ep.season).padStart(2, "0")}E${String(ep.number).padStart(2, "0")}`;

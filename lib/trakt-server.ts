@@ -81,6 +81,17 @@ export const getCurrentUser = cache(
 );
 
 /**
+ * Returns the authenticated user's Trakt account settings (timezone, date
+ * format, 24-hour preference, etc.). Cached per-request.
+ */
+export const getUserSettings = cache(async () => {
+	const client = await getAuthenticatedTraktClient();
+	const res = await client.users.settings().catch(() => null);
+	if (!res || res.status !== 200) return null;
+	return res.body as { account: { timezone: string; time_24hr: boolean } };
+});
+
+/**
  * Check if a profile slug belongs to the current user.
  */
 export async function isCurrentUser(profileSlug: string): Promise<boolean> {
